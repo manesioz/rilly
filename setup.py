@@ -14,7 +14,6 @@ setup(
   install_requires=[
           'google-cloud-pubsub',
           'google-cloud-logging', 
-          'faust[rocksdb,uvloop,fast,redis]',
       ],
   classifiers=[
     'Development Status :: 3 - Alpha',      
