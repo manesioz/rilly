@@ -30,13 +30,13 @@ from rilly import logging, stream
 
 stream.create_pubsub_topic('my-project-id', 'pubsub-topic') #create a PubSub topic to send your change events to 
 logging.create_sink('sink-id', 'my-project-id', 'my-dataset-id', pubsub_topic='pubsub-topic') #create sink to send logs to PubSub topic
-stream.create_pubsub_subscription('my-project-id', 'pubsub-topic', 'cdc-subscription', 30) #create subscription to PubSub topic
 
 def custom_callback(message: str) -> str: #custom callback function to perform some action on each event
-    print(message)
+    print('Received message data: {}'.format(message.data))
     return message 
-   
-# do future stuff 
+    
+#create subscription to PubSub topic, apply custom_callback() to each streamed log
+stream.subscribe('my-project-id', 'pubsub-topic', 'cdc-subscription', 30, custom_callback) 
 ```
 
 
