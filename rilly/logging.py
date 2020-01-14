@@ -28,3 +28,34 @@ def list_table_change_logs(project_id: str, dataset_id: str) -> Generator[str, N
   
   for log in client.list_log_entries(resource_names, filter_=query):
       yield log 
+
+      
+def create_sink(sink_id: str, pubsub_topic: str, query: str) -> None:
+    """Creates a sink to export logs to the given PubSub Topic.
+    
+    :param sink_id: A unique identifier for the sink 
+    :type sink_id: str 
+    
+    :param pubsub_topic: The PubSub Topic that the logs will export to 
+    :type pubsub_topic: str 
+    
+    :param query: The query that filters what logs will be exported 
+    :type query: str 
+    
+    :return: Nothing
+    :rtype: None
+    """
+    client = logging_v2.LoggingServiceV2Client()
+    destination = 'pubsub.googleapis.com/{}'.format(pubsub_topic)
+    
+    sink = client.sink(
+        sink_id,
+        filter_=query,
+        destination)
+
+    if sink.exists():
+        print('Sink {} already exists.'.format(sink.name))
+        return
+
+    sink.create()
+    print('Created sink {}'.format(sink.name))
