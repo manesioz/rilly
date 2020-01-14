@@ -28,16 +28,17 @@ Say you want to track all update/delete/insert events in your BigQuery dataset. 
 ```python
 from rilly import logging, stream
 
-stream.create_pubsub_topic('my-project-id', 'pubsub-topic') #create a PubSub topic to send your change events to 
-logging.create_sink('sink-id', 'my-project-id', 'my-dataset-id', pubsub_topic='pubsub-topic') #create sink to send logs to PubSub topic
+#create a PubSub topic to send your change events to 
+stream.create_pubsub_topic('my-project-id', 'pubsub-topic') 
 
-def custom_callback(message: str) -> str: #custom callback function to perform some action on each event
+#create sink to send logs to PubSub topic
+logging.create_sink('sink-id', 'my-project-id', 'my-dataset-id', pubsub_topic='pubsub-topic') 
+
+#custom callback function to perform some action on each event
+def custom_callback(message: str) -> str: 
     print('Received message data: {}'.format(message.data))
     return message 
     
 #create subscription to PubSub topic, apply custom_callback() to each streamed log
 stream.subscribe('my-project-id', 'pubsub-topic', 'cdc-subscription', 30, custom_callback) 
 ```
-
-
-
