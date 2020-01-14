@@ -1,10 +1,10 @@
 from google.cloud import logging_v2
+from google.cloud import logging 
 from typing import Generator
 
 
 def list_table_change_logs(project_id: str, dataset_id: str) -> Generator[str, None, None]: 
-  '''
-  Helper function that returns all relevant logs (directly from the Stackdriver API, not PubSub)
+  '''Helper function that returns all relevant logs (directly from the Stackdriver API, not PubSub)
   
   :param project_id: The project_id that is associated with your GCP account and BigQuery Table
   :type project_id: str 
@@ -30,11 +30,14 @@ def list_table_change_logs(project_id: str, dataset_id: str) -> Generator[str, N
       yield log 
 
       
-def create_sink(sink_id: str, pubsub_topic: str, query: str) -> None:
+def create_sink(sink_id: str, project_id: str, pubsub_topic: str, query: str) -> None:
     """Creates a sink to export logs to the given PubSub Topic.
     
     :param sink_id: A unique identifier for the sink 
     :type sink_id: str 
+    
+    :param project_id: The project_id that is associated with your GCP account and BigQuery Table
+    :type project_id: str
     
     :param pubsub_topic: The PubSub Topic that the logs will export to 
     :type pubsub_topic: str 
@@ -45,17 +48,19 @@ def create_sink(sink_id: str, pubsub_topic: str, query: str) -> None:
     :return: Nothing
     :rtype: None
     """
-    client = logging_v2.LoggingServiceV2Client()
-    destination = 'pubsub.googleapis.com/{}'.format(pubsub_topic)
+    client = logging.Client()    
+    destination = 'pubsub.googleapis.com/projects/{project_id}/topics/{pubsub_topic}'.format(
+        project_id=project_id, pubsub_topic=pubsub_topic)
     
     sink = client.sink(
         sink_id,
         filter_=query,
-        destination)
+        destination=destination)
 
     if sink.exists():
         print('Sink {} already exists.'.format(sink.name))
         return
-
-    sink.create()
-    print('Created sink {}'.format(sink.name))
+    else: 
+        sink.create()
+        print('Created sink {}'.format(sink.name))
+        return 
