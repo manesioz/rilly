@@ -1,5 +1,5 @@
 from google.cloud import pubsub_v1
-
+from typing import Callable
 
 def create_pubsub_topic(project_id: str, pubsub_topic: str) -> None: 
     '''Method that creates a PubSub Topic in a specified GCP project 
@@ -21,8 +21,8 @@ def create_pubsub_topic(project_id: str, pubsub_topic: str) -> None:
     return 
     
 
-def create_pubsub_subscription(project_id: str, pubsub_topic: str, subscription_id: str, wait_time: int) -> None: 
-    '''Method that subscribes to a PubSub Topic
+def subscribe(project_id: str, pubsub_topic: str, subscription_id: str, wait_time: int, callback: Callable) -> None: 
+    '''Method that subscribes to a PubSub Topic and applies callback function to each streamed log
     
     :param project_id: A project_id that is associated with your GCP account
     :type project_id: str
@@ -35,6 +35,9 @@ def create_pubsub_subscription(project_id: str, pubsub_topic: str, subscription_
     
     :param wait_time: How long the subscriber should listen for the message (in seconds) 
     :type wait_time: int
+    
+    :param callback: The callback function that processes the streamed log 
+    :type callback: Callable 
     
     :return: Nothing 
     :rtype: None 
@@ -51,5 +54,10 @@ def create_pubsub_subscription(project_id: str, pubsub_topic: str, subscription_
     
     subscriber.create_subscription(
       name=subscription_name, topic=topic_name)
-    return 
     
+    future = subscriber.subscribe(subscription_name, callback)
+    
+    try: 
+        future.result(timeout=wait_time)
+    except KeyboardInterrupt: 
+        future.cancel() 
