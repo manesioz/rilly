@@ -30,7 +30,7 @@ def list_table_change_logs(project_id: str, dataset_id: str) -> Generator[str, N
       yield log 
 
       
-def create_sink(sink_id: str, project_id: str, pubsub_topic: str, query: str) -> None:
+def create_sink(sink_id: str, project_id: str, dataset_id: str, pubsub_topic: str, query: str = None) -> None:
     """Creates a sink to export logs to the given PubSub Topic.
     
     :param sink_id: A unique identifier for the sink 
@@ -52,6 +52,14 @@ def create_sink(sink_id: str, project_id: str, pubsub_topic: str, query: str) ->
     destination = 'pubsub.googleapis.com/projects/{project_id}/topics/{pubsub_topic}'.format(
         project_id=project_id, pubsub_topic=pubsub_topic)
     
+    if query is None: 
+      query = '''
+      resource.labels.dataset_id="{dataset_id}"
+      resource.labels.project_id="{project_id}"
+      protoPayload.metadata.@type="type.googleapis.com/google.cloud.audit.BigQueryAuditMetadata"
+      (protoPayload.metadata.tableDataChange.deletedRowsCount > "0" OR protoPayload.metadata.tableDataChange.insertedRowsCount > "0")
+      '''.format(project_id=project_id, dataset_id=dataset_id)
+      
     sink = client.sink(
         sink_id,
         filter_=query,
