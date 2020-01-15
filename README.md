@@ -5,7 +5,7 @@
 </p>
 
 ### What is Change Data Capture? 
-Change data capture (CDC) is a set of software design patterns used to determine (and track) the data that has changed so that action can be taken using the changed data. Instead of continuously polling a database for changes (which is costly if you do it often and inaccurate if you don't), rilly uses the log-based approach (as does [`debezium`](https://debezium.io) and all other major CDC frameworks). 
+Change data capture (CDC) is a set of software design patterns used to determine (and track) the data that has changed so that action can be taken using the changed data. Instead of continuously polling a database for changes (which is costly if you do it often and inaccurate if you don't), `rilly` uses the log-based approach (as does [`debezium`](https://debezium.io) and all other major CDC frameworks). 
 
 
 ### Why `rilly`?
@@ -36,7 +36,7 @@ logging.create_sink('sink-id', 'my-project-id', 'my-dataset-id', pubsub_topic='p
 
 #custom callback function to perform some action on each event
 def custom_callback(message: str) -> str: 
-    print('Received message data: {}'.format(message.data))
+    print('Received message data: {}'.format(message))
     return message 
     
 #create subscription to PubSub topic, apply custom_callback() to each streamed log
